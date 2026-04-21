@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --burgundy: #7a1b1b;
+  --burgundy-dark: #5a1212;
+  --ink: #141414;
+  --ink2: #3a3a3a;
+  --ink3: #6a6a6a;
+  --paper: #faf9f7;
+  --paper2: #f3f1ec;
+  --border: #ddd9d0;
+}
+.article-title:hover {
+  color: var(--burgundy) !important;
+}
+.issue-card {
+  transition: transform .15s, box-shadow .15s;
+}
+.issue-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+body {
+  background: #faf9f7 !important;
+  color: #141414;
+  font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+  line-height: 1.6;
+}
+
+a { text-decoration: none; color: inherit; }
