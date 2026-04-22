@@ -195,7 +195,7 @@ export default async function Home() {
                 <p style={{ fontSize: 13, color: 'var(--ink3)', marginBottom: 12 }}>
                   Принимаем статьи по разделам ВАК 5.6, 5.8, 5.4. Двойное слепое рецензирование.
                 </p>
-                <a href="#" style={{ display: 'block', background: 'var(--burgundy)', color: '#fff', textAlign: 'center', padding: '9px', borderRadius: 4, fontSize: 13, textDecoration: 'none' }}>
+                <a href="http://localhost:3000/rules" style={{ display: 'block', background: 'var(--burgundy)', color: '#fff', textAlign: 'center', padding: '9px', borderRadius: 4, fontSize: 13, textDecoration: 'none' }}>
                   Правила для авторов →
                 </a>
               </div>
