@@ -83,8 +83,8 @@ export default async function AdminPage() {
             </span>
                         <nav style={{ display: 'flex', gap: 4 }}>
                             {[
-                                { label: 'Дашборд', href: '/admin' },
-                                { label: 'Статьи',  href: '/admin' },
+                                { label: 'Дашборд',  href: '/admin' },
+                                { label: 'Выпуски',  href: '/admin/issues' },
                                 { label: '+ Статья', href: '/admin/articles/new' },
                             ].map(({ label, href }) => (
                                 <a key={label} href={href} style={{
