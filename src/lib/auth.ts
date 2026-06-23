@@ -12,6 +12,7 @@ export async function loginUser(email: string, password: string) {
     const user = users[0]
     if (!user) return null
 
+
     const valid = await bcrypt.compare(password, user.password_hash)
     if (!valid) return null
 
