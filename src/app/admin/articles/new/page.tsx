@@ -1,8 +1,7 @@
 import { query } from '@/lib/db'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import NewArticleForm from './NewArticleForm'
-
+import ArticleForm from '../_components/ArticleForm'
 async function getIssues() {
     return query(`
     SELECT id, volume, number, year, title_ru
@@ -83,7 +82,7 @@ export default async function NewArticlePage() {
                     </h1>
                 </div>
 
-                <NewArticleForm issues={issues} sections={sections} />
+                <ArticleForm issues={issues} sections={sections} />
             </main>
         </div>
     )

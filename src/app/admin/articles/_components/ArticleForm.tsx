@@ -28,6 +28,23 @@ type Author = {
 
 type Status = 'draft' | 'review' | 'published' | 'retracted';
 
+export type ArticleInitialValues = {
+    title_ru?: string;
+    title_en?: string | null;
+    abstract_ru?: string;
+    abstract_en?: string | null;
+    doi?: string | null;
+    issue_id?: string;
+    section_id?: string;
+    pages_from?: number | null;
+    pages_to?: number | null;
+    status?: Status;
+    keywords?: string[];
+    authors?: Author[];
+    pdf_path?: string | null;
+};
+
+
 const emptyAuthor: Author = {
     last_name_ru: '',
     first_name_ru: '',
@@ -83,27 +100,35 @@ const legendStyle: React.CSSProperties = {
     borderBottom: '1px solid var(--border)',
 };
 
-export default function NewArticleForm({
-                                           issues,
-                                           sections,
-                                       }: {
+export default function ArticleForm({
+                                        issues,
+                                        sections,
+                                        initialValues,
+                                        articleId,
+                                    }: {
     issues: Issue[];
     sections: Section[];
+    initialValues?: ArticleInitialValues;
+    articleId?: string;
 }) {
+    const isEdit = !!articleId;
+    const iv = initialValues ?? {};
     const router = useRouter();
 
-    const [titleRu, setTitleRu] = useState('');
-    const [titleEn, setTitleEn] = useState('');
-    const [abstractRu, setAbstractRu] = useState('');
-    const [abstractEn, setAbstractEn] = useState('');
-    const [doi, setDoi] = useState('');
-    const [issueId, setIssueId] = useState('');
-    const [sectionId, setSectionId] = useState('');
-    const [pagesFrom, setPagesFrom] = useState('');
-    const [pagesTo, setPagesTo] = useState('');
-    const [status, setStatus] = useState<Status>('draft');
-    const [keywords, setKeywords] = useState('');
-    const [authors, setAuthors] = useState<Author[]>([{ ...emptyAuthor }]);
+    const [titleRu, setTitleRu] = useState(iv.title_ru ?? '');
+    const [titleEn, setTitleEn] = useState(iv.title_en ?? '');
+    const [abstractRu, setAbstractRu] = useState(iv.abstract_ru ?? '');
+    const [abstractEn, setAbstractEn] = useState(iv.abstract_en ?? '');
+    const [doi, setDoi] = useState(iv.doi ?? '');
+    const [issueId, setIssueId] = useState(iv.issue_id ?? '');
+    const [sectionId, setSectionId] = useState(iv.section_id ?? '');
+    const [pagesFrom, setPagesFrom] = useState(iv.pages_from?.toString() ?? '');
+    const [pagesTo, setPagesTo] = useState(iv.pages_to?.toString() ?? '');
+    const [status, setStatus] = useState<Status>(iv.status ?? 'draft');
+    const [keywords, setKeywords] = useState((iv.keywords ?? []).join(', '));
+    const [authors, setAuthors] = useState<Author[]>(
+        iv.authors && iv.authors.length ? iv.authors : [{ ...emptyAuthor }]
+    );
     const [pdf, setPdf] = useState<File | null>(null);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -145,7 +170,9 @@ export default function NewArticleForm({
             fd.append('payload', JSON.stringify(payload));
             if (pdf) fd.append('pdf', pdf);
 
-            const res = await fetch('/api/admin/articles', { method: 'POST', body: fd });
+            const url = isEdit ? `/api/admin/articles/${articleId}` : '/api/admin/articles';
+            const method = isEdit ? 'PATCH' : 'POST';
+            const res = await fetch(url, { method, body: fd });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Не удалось сохранить');
 
@@ -329,18 +356,34 @@ export default function NewArticleForm({
             {/* PDF */}
             <div style={fieldsetStyle}>
                 <div style={legendStyle}>PDF</div>
-                <input
-                    type="file"
-                    accept="application/pdf"
-                    onChange={e => setPdf(e.target.files?.[0] || null)}
-                    style={{ fontSize: 13, color: 'var(--ink2)' }}
-                />
-                {pdf && (
-                    <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ink3)' }}>
-                        {pdf.name} · {(pdf.size / 1024 / 1024).toFixed(2)} МБ
-                    </div>
-                )}
+                {isEdit && iv.pdf_path && !pdf && (
+                    <div style={{ marginBottom: 12, fontSize: 13, color: 'var(--ink2)' }}>
+                        Текущий файл:{' '}
+
+                     <a   href={`/${iv.pdf_path}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: 'var(--burgundy)' }}
+                        >
+                        {iv.pdf_path.split('/').pop()}
+                    </a>
+                    <div style={{ fontSize: 12, color: 'var(--ink3)', marginTop: 4 }}>
+                Загрузите новый, чтобы заменить
             </div>
+        </div>
+)}
+    <input
+        type="file"
+        accept="application/pdf"
+        onChange={e => setPdf(e.target.files?.[0] || null)}
+        style={{ fontSize: 13, color: 'var(--ink2)' }}
+    />
+{pdf && (
+        <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ink3)' }}>
+            {pdf.name} · {(pdf.size / 1024 / 1024).toFixed(2)} МБ
+        </div>
+    )}
+</div>
 
             {error && (
                 <div
@@ -389,7 +432,7 @@ export default function NewArticleForm({
                         opacity: busy ? 0.6 : 1,
                     }}
                 >
-                    {busy ? 'Сохранение…' : 'Сохранить'}
+                    {busy ? 'Сохранение…' : isEdit ? 'Сохранить изменения' : 'Сохранить'}
                 </button>
             </div>
         </form>

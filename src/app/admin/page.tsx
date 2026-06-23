@@ -228,14 +228,40 @@ export default async function AdminPage() {
                                     </td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <div style={{ display: 'flex', gap: 8 }}>
-                                            {a.doi && (
-                                                <a href={`/article/${encodeURIComponent(a.doi)}`}
-                                                   style={{ fontSize: 12, color: 'var(--burgundy)' }}>
+                                            {a.doi ? (
+                                                <a href={`/article/${a.doi}`}
+                                                   style={{
+                                                       fontSize: 12,
+                                                       color: 'var(--burgundy)',
+                                                       textDecoration: 'none',
+                                                       padding: '4px 10px',
+                                                       border: '1px solid var(--burgundy)',
+                                                       borderRadius: 3,
+                                                   }}>
                                                     Просмотр
                                                 </a>
+                                            ) : (
+                                                <span style={{
+                                                    fontSize: 12,
+                                                    color: 'var(--ink3)',
+                                                    padding: '4px 10px',
+                                                    border: '1px dashed var(--border)',
+                                                    borderRadius: 3,
+                                                    fontStyle: 'italic',
+                                                }}>
+                Без DOI
+            </span>
                                             )}
                                             <a href={`/admin/articles/${a.id}/edit`}
-                                               style={{ fontSize: 12, color: 'var(--ink3)' }}>
+                                               style={{
+                                                   fontSize: 12,
+                                                   color: 'var(--ink2)',
+                                                   textDecoration: 'none',
+                                                   padding: '4px 10px',
+                                                   border: '1px solid var(--border)',
+                                                   borderRadius: 3,
+                                                   background: '#fff',
+                                               }}>
                                                 Изменить
                                             </a>
                                         </div>

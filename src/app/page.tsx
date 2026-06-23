@@ -82,7 +82,7 @@ export default async function Home() {
                 <div style={{ fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 16 }}>
                   Последний выпуск · №{currentIssue?.number} ({currentIssue?.volume}) · {currentIssue?.year}
                 </div>
-                <a href={`/article/${encodeURIComponent(heroArticle.doi)}`}>
+                <a href={`/article/${heroArticle.doi}`}>
                   <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(22px, 3vw, 36px)', fontWeight: 700, lineHeight: 1.2, maxWidth: 720, marginBottom: 16, color: '#fff' }}>
                     {heroArticle.title_ru}
                   </h1>
@@ -97,10 +97,10 @@ export default async function Home() {
                     </p>
                 )}
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <a href="#" style={{ background: 'var(--burgundy)', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>
+                  <a href={`/article/${heroArticle.doi}`} style={{ background: 'var(--burgundy)', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>
                     Читать статью
                   </a>
-                  <a href="#" style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, textDecoration: 'none' }}>
+                  <a href={`/api/pdf/${heroArticle.id}`} style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, textDecoration: 'none' }}>
                     Скачать PDF
                   </a>
                 </div>
@@ -131,7 +131,7 @@ export default async function Home() {
             <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 700 }}>
               Статьи текущего выпуска
             </h2>
-            <a href="#" style={{ fontSize: 13, color: 'var(--burgundy)', textDecoration: 'none' }}>
+            <a href="/archive" style={{ fontSize: 13, color: 'var(--burgundy)', textDecoration: 'none' }}>
               Все статьи →
             </a>
           </div>
@@ -144,7 +144,7 @@ export default async function Home() {
                     <div style={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: sectionColors[article.section_slug] || 'var(--burgundy)', marginBottom: 6, fontWeight: 600 }}>
                       {article.section_name}
                     </div>
-                    <a href={`/article/${encodeURIComponent(article.doi)}`}>
+                    <a href={`/article/${article.doi}`}>
                       <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: 17, fontWeight: 600, lineHeight: 1.3, marginBottom: 6, color: 'var(--ink)' }}>
                         {article.title_ru}
                       </h3>
@@ -162,7 +162,7 @@ export default async function Home() {
                   <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--ink3)' }}>
                     DOI: {article.doi}
                   </span>
-                      <a href="#" style={{ fontSize: 11, padding: '3px 10px', border: '1px solid var(--border)', borderRadius: 3, color: 'var(--ink3)', textDecoration: 'none' }}>PDF</a>
+                      <a href={`/api/pdf/${article.id}`} style={{ fontSize: 11, padding: '3px 10px', border: '1px solid var(--border)', borderRadius: 3, color: 'var(--ink3)', textDecoration: 'none' }}>PDF</a>
                       <a href="#" style={{ fontSize: 11, padding: '3px 10px', border: '1px solid #c0d0c0', borderRadius: 3, color: '#2a5a2a', background: '#f4f8f4', textDecoration: 'none' }}>&lt;/&gt; JATS</a>
                     </div>
                   </div>
@@ -208,7 +208,7 @@ export default async function Home() {
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
               <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 700 }}>Архив выпусков</h2>
-              <a href="#" style={{ fontSize: 13, color: 'var(--burgundy)', textDecoration: 'none' }}>Весь архив →</a>
+              <a href="/archive" style={{ fontSize: 13, color: 'var(--burgundy)', textDecoration: 'none' }}>Весь архив →</a>
             </div>
             <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8 }}>
               {allIssues.map((issue: any) => (
