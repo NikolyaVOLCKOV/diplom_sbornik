@@ -1,6 +1,6 @@
 export default function Footer() {
     return (
-        <footer style={{ background: '#141414', color: 'rgba(255,255,255,0.5)', padding: '48px 0 24px', marginTop: 40 }}>
+        <footer className="site-footer-grid" style={{ background: '#141414', color: 'rgba(255,255,255,0.5)', padding: '48px 0 24px', marginTop: 40 }}>
             <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 40, marginBottom: 32 }}>
                     <div>

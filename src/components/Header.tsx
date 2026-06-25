@@ -6,12 +6,12 @@ export default function Header() {
 
     return (
         <header style={{ background: '#fff', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 100 }}>
-            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', height: 64, gap: 32 }}>
+            <div className="site-header-inner container" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', height: 64, gap: 32 }}>
                 <a href="/" style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, fontWeight: 700, lineHeight: 1.25, maxWidth: 280, color: 'var(--ink)' }}>
                     Гуманитарные исследования Центральной России
                 </a>
 
-                <nav style={{ display: 'flex', gap: 2, flex: 1, position: 'relative' }}>
+                <nav className="site-nav" style={{ display: 'flex', gap: 2, flex: 1, position: 'relative' }}>
 
                     {/* О журнале — с выпадающим меню */}
                     <div

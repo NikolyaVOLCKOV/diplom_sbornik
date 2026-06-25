@@ -1,0 +1,144 @@
+/* =========================================================
+   АДАПТИВНАЯ ВЁРСТКА
+   Этот файл перекрывает инлайновые стили на узких экранах.
+   ========================================================= */
+
+/* ---- Базовое ---- */
+html, body {
+    overflow-x: hidden;  /* защита от горизонтального скролла */
+}
+
+img, video {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ---- ПЛАНШЕТЫ И МОБИЛЬНЫЕ (≤ 768px) ---- */
+@media (max-width: 768px) {
+
+    /* === Главная страница === */
+
+    /* Топ-бар — компактнее */
+    .top-bar {
+        font-size: 10px !important;
+        padding: 4px 8px !important;
+    }
+
+    /* Hero — меньше паддинги, заголовок мельче */
+    .hero {
+        padding: 32px 0 28px !important;
+    }
+    .hero-inner {
+        padding: 0 16px !important;
+    }
+    .hero h1 {
+        font-size: 22px !important;
+    }
+
+    /* Статистика — сетка 2×2 вместо 4 колонок */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 20px !important;
+        padding: 16px !important;
+    }
+    .stats-grid .stat-num {
+        font-size: 26px !important;
+    }
+
+    /* Двухколоночные блоки (статьи + сайдбар) — в одну колонку */
+    .page-grid {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+        padding: 24px 16px !important;
+    }
+
+    /* Контейнеры — убираем большие горизонтальные паддинги */
+    .container {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    /* Архив выпусков — оставляем горизонтальный скролл, но карточки помельче */
+    .archive-strip {
+        gap: 12px !important;
+    }
+    .archive-card {
+        width: 110px !important;
+    }
+
+    /* === Страница статьи === */
+
+    .article-title {
+        font-size: 22px !important;
+    }
+    .article-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .article-actions > * {
+        justify-content: center !important;
+    }
+
+    /* === Поиск === */
+
+    .search-form {
+        flex-direction: column !important;
+    }
+    .search-form button {
+        padding: 12px !important;
+    }
+
+    /* === Шапка сайта (Header.tsx) === */
+
+    .site-header-inner {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        padding: 12px 16px !important;
+        height: auto !important;
+    }
+    .site-nav {
+        width: 100%;
+        overflow-x: auto;
+        gap: 12px !important;
+        font-size: 13px !important;
+    }
+    .site-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* === Таблицы (если где-то есть) === */
+    table {
+        font-size: 12px !important;
+    }
+    th, td {
+        padding: 8px !important;
+    }
+}
+
+/* ---- УЗКИЕ МОБИЛЬНЫЕ (≤ 480px) ---- */
+@media (max-width: 480px) {
+
+    .hero h1 {
+        font-size: 19px !important;
+    }
+    .article-title {
+        font-size: 19px !important;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 12px !important;
+    }
+    .archive-card {
+        width: 96px !important;
+    }
+    h1, h2 {
+        word-break: break-word;
+    }
+}
+
+@media (max-width: 768px) {
+    .site-footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+    }
+}

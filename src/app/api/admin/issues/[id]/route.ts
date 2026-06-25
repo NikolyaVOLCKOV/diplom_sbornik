@@ -1,82 +1,117 @@
-import { NextRequest, NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import  pool  from '@/lib/db';
+
+export const runtime = 'nodejs';
+
+type Payload = {
+    volume: number;
+    number: number;
+    year: number;
+    title_ru?: string;
+    title_en?: string;
+    published_at?: string;
+    cover_url?: string;
+    is_current?: boolean;
+};
 
 export async function PATCH(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const token = req.cookies.get('auth_token')
-    if (!token) return NextResponse.json({ error: 'Не авторизован' }, { status: 401 })
+    const { id } = await params;
 
-    const { id } = await params
-    const client = await pool.connect()
+    const token = (await cookies()).get('auth_token')?.value;
+    if (!token) return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
 
+    let data: Payload;
     try {
-        const { volume, number, year, title_ru, is_current } = await req.json()
+        data = await req.json();
+    } catch {
+        return NextResponse.json({ error: 'Невалидный JSON' }, { status: 400 });
+    }
 
-        if (!volume || !number || !year) {
-            return NextResponse.json({ error: 'Заполните обязательные поля' }, { status: 400 })
+    if (!Number.isInteger(data.volume) || data.volume < 1
+        || !Number.isInteger(data.number) || data.number < 1
+        || !Number.isInteger(data.year) || data.year < 1900 || data.year > 2100) {
+        return NextResponse.json({ error: 'Невалидные числовые поля' }, { status: 400 });
+    }
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const exists = await client.query(`SELECT 1 FROM issues WHERE id = $1`, [id]);
+        if (!exists.rowCount) {
+            await client.query('ROLLBACK');
+            return NextResponse.json({ error: 'Выпуск не найден' }, { status: 404 });
         }
 
-        await client.query('BEGIN')
-
-        if (is_current) {
+        if (data.is_current) {
             await client.query(
                 `UPDATE issues SET is_current = FALSE WHERE is_current = TRUE AND id != $1`,
                 [id]
-            )
+            );
         }
 
         await client.query(
-            `UPDATE issues
-       SET volume=$1, number=$2, year=$3, title_ru=$4, is_current=$5
-       WHERE id=$6`,
-            [volume, number, year, title_ru || null, is_current || false, id]
-        )
+            `UPDATE issues SET
+         volume = $1, number = $2, year = $3,
+         title_ru = $4, title_en = $5,
+         published_at = $6, cover_url = $7,
+         is_current = $8
+       WHERE id = $9`,
+            [
+                data.volume,
+                data.number,
+                data.year,
+                data.title_ru?.trim() || null,
+                data.title_en?.trim() || null,
+                data.published_at || null,
+                data.cover_url?.trim() || null,
+                !!data.is_current,
+                id,
+            ]
+        );
 
-        await client.query('COMMIT')
-
-        return NextResponse.json({ ok: true })
-    } catch (err) {
-        await client.query('ROLLBACK')
-        console.error('Update issue error:', err)
-        return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 })
+        await client.query('COMMIT');
+        return NextResponse.json({ ok: true });
+    } catch (e: unknown) {
+        await client.query('ROLLBACK');
+        if (e && typeof e === 'object' && 'code' in e && e.code === '23505') {
+            return NextResponse.json(
+                { error: `Выпуск Т.${data.volume} №${data.number} уже существует` },
+                { status: 409 }
+            );
+        }
+        console.error(e);
+        return NextResponse.json({ error: 'Ошибка БД' }, { status: 500 });
     } finally {
-        client.release()
+        client.release();
     }
 }
 
 export async function DELETE(
-    req: NextRequest,
+    _req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const token = req.cookies.get('auth_token')
-    if (!token) return NextResponse.json({ error: 'Не авторизован' }, { status: 401 })
+    const { id } = await params;
 
-    const { id } = await params
-    const client = await pool.connect()
+    const token = (await cookies()).get('auth_token')?.value;
+    if (!token) return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
 
     try {
-        // Проверяем что в выпуске нет статей
-        const articles = await client.query(
-            `SELECT COUNT(*) AS count FROM articles WHERE issue_id = $1`,
-            [id]
-        )
-
-        if (Number(articles.rows[0].count) > 0) {
+        await pool.query(`DELETE FROM issues WHERE id = $1`, [id]);
+        return NextResponse.json({ ok: true });
+    } catch (e: unknown) {
+        // ON DELETE RESTRICT в схеме — нельзя удалить выпуск со статьями
+        if (e && typeof e === 'object' && 'code' in e && e.code === '23503') {
             return NextResponse.json(
-                { error: 'Нельзя удалить выпуск со статьями. Сначала удалите или перенесите статьи.' },
-                { status: 400 }
-            )
+                { error: 'Нельзя удалить выпуск, в котором есть статьи' },
+                { status: 409 }
+            );
         }
-
-        await client.query(`DELETE FROM issues WHERE id = $1`, [id])
-
-        return NextResponse.json({ ok: true })
-    } catch (err) {
-        console.error('Delete issue error:', err)
-        return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 })
-    } finally {
-        client.release()
+        console.error(e);
+        return NextResponse.json({ error: 'Ошибка БД' }, { status: 500 });
     }
 }

@@ -1,8 +1,42 @@
 import { query } from '@/lib/db'
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-async function getArticle(doi: string) {
+
+type PageParams = Promise<{ doi: string[] }>
+
+type Article = {
+    id: string
+    title_ru: string
+    title_en: string | null
+    abstract_ru: string | null
+    abstract_en: string | null
+    doi: string
+    pages_from: number | null
+    pages_to: number | null
+    pdf_path: string | null
+    published_at: string | null
+    section_id: string
+    issue_number: number
+    issue_volume: number
+    issue_year: number
+    issue_title: string | null
+    section_name: string
+    section_slug: string
+    vak_code: string | null
+    authors: Array<{
+        last_name: string
+        first_name: string
+        middle_name: string | null
+        orcid: string | null
+        affiliation: string | null
+        order: number
+    }> | null
+    keywords: string[] | null
+}
+
+async function getArticle(doi: string): Promise<Article | null> {
     const decoded = decodeURIComponent(doi)
     const rows = await query(`
     SELECT
@@ -46,7 +80,7 @@ async function getArticle(doi: string) {
 }
 
 async function getRelatedArticles(articleId: string, sectionId: string) {
-    return query(`
+    return query<{ id: string; title_ru: string; doi: string; first_author: string | null }>(`
     SELECT a.id, a.title_ru, a.doi,
       (
         SELECT au.last_name_ru
@@ -61,13 +95,40 @@ async function getRelatedArticles(articleId: string, sectionId: string) {
     LIMIT 4
   `, [sectionId, articleId])
 }
+// SEO: Open Graph и title по данным статьи
+export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
+    const { doi: doiParts } = await params
+    const doi = doiParts.join('/')
+    const article = await getArticle(doi)
 
-export default async function ArticlePage({
-                                              params,
-                                          }: {
-    params: { doi: string }
-}) {
-    const { doi } = await params
+    if (!article) {
+        return { title: 'Статья не найдена — ГИЦР' }
+    }
+
+    const authors = article.authors || []
+    const authorsLine = authors
+        .map(a => `${a.last_name} ${a.first_name[0]}.`)
+        .join(', ')
+
+    return {
+        title: `${article.title_ru} — ГИЦР`,
+        description: article.abstract_ru?.slice(0, 200) || undefined,
+        authors: authors.map(a => ({ name: `${a.last_name} ${a.first_name}` })),
+        openGraph: {
+            title: article.title_ru,
+            description: article.abstract_ru?.slice(0, 200) || undefined,
+            type: 'article',
+            authors: authors.length ? [authorsLine] : undefined,
+            publishedTime: article.published_at || undefined,
+        },
+    }
+}
+export default async function ArticlePage({ params }: { params: PageParams }) {
+    const { doi: doiParts } = await params
+    // catch-all присылает сегменты декодированными; склеиваем обратно через /
+    const doi = doiParts.join('/')
+    // Защита от мусорных запросов: DOI всегда начинается с "10."
+    if (!doi.startsWith('10.')) notFound()
     const article = await getArticle(doi)
     if (!article) notFound()
 
@@ -95,7 +156,7 @@ export default async function ArticlePage({
                 </div>
             </div>
 
-            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 32px', display: 'grid', gridTemplateColumns: '1fr 300px', gap: 48 }}>
+            <div className="page-grid container" style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 32px', display: 'grid', gridTemplateColumns: '1fr 300px', gap: 48 }}>
 
                 {/* ОСНОВНОЙ КОНТЕНТ */}
                 <article>
@@ -107,7 +168,7 @@ export default async function ArticlePage({
                     </div>
 
                     {/* Заголовок */}
-                    <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 700, lineHeight: 1.25, marginBottom: 24, color: 'var(--ink)' }}>
+                    <h1 className="article-title" style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 700, lineHeight: 1.25, marginBottom: 24, color: 'var(--ink)' }}>
                         {article.title_ru}
                     </h1>
 
@@ -135,22 +196,38 @@ export default async function ArticlePage({
 
                     {/* Кнопки скачивания */}
                     <div style={{ display: 'flex', gap: 10, marginBottom: 32, flexWrap: 'wrap' }}>
-                        {article.pdf_path && (
-                            <a href={`/api/pdf/${article.id}`}
-                               style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--burgundy)', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 500 }}>
-                                ↓ Скачать PDF
+                        {article.pdf_path ? (
+
+                        <a    href={`/api/pdf/${article.id}`}
+                            style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--burgundy)', color: '#fff', padding: '10px 20px', borderRadius: 4, fontSize: 14, fontWeight: 500, textDecoration: 'none' }}
+                            >
+                            ↓ Скачать PDF
                             </a>
-                        )}
-                        {!article.pdf_path && (
+                            ) : (
                             <span style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--paper2)', color: 'var(--ink3)', padding: '10px 20px', borderRadius: 4, fontSize: 14, border: '1px solid var(--border)' }}>
-                PDF недоступен
-              </span>
-                        )}
-                        <a href={`/api/jats/${article.id}`}
-                           style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f4f8f4', color: '#2a5a2a', padding: '10px 20px', borderRadius: 4, fontSize: 14, border: '1px solid #c0d0c0' }}>
-                            &lt;/&gt; JATS XML
-                        </a>
-                    </div>
+                        PDF недоступен
+                    </span>
+                    )}
+                    {/* JATS endpoint пока не реализован — кнопка disabled */}
+
+                       <a href={`/api/jats/${article.id}`}
+                        style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        background: '#f4f8f4',
+                        color: '#2a5a2a',
+                        padding: '10px 20px',
+                        borderRadius: 4,
+                        fontSize: 14,
+                        border: '1px solid #c0d0c0',
+                        textDecoration: 'none',
+                    }}
+                        title="Скачать метаданные статьи в формате JATS XML"
+                        >
+                        &lt;/&gt; JATS XML
+                    </a>
+            </div>
 
                     {/* Аннотация */}
                     {article.abstract_ru && (
@@ -207,10 +284,15 @@ export default async function ArticlePage({
                             {[
                                 { label: 'DOI', value: article.doi },
                                 { label: 'Выпуск', value: `${article.issue_number} (${article.issue_volume}) ${article.issue_year}` },
-                                { label: 'Страницы', value: `${article.pages_from}–${article.pages_to}` },
+                                {
+                                    label: 'Страницы',
+                                    value: article.pages_from && article.pages_to
+                                        ? `${article.pages_from}–${article.pages_to}`
+                                        : null,
+                                },
                                 { label: 'Раздел', value: article.section_name },
                                 { label: 'ВАК', value: article.vak_code },
-                                { label: 'Опубликована', value: article.published_at ? new Date(article.published_at).toLocaleDateString('ru-RU') : '—' },
+                                { label: 'Опубликована', value: article.published_at ? new Date(article.published_at).toLocaleDateString('ru-RU') : null },
                             ].filter(r => r.value).map(({ label, value }) => (
                                 <tr key={label}>
                                     <td style={{ padding: '6px 0', color: 'var(--ink3)', paddingRight: 12, verticalAlign: 'top', whiteSpace: 'nowrap' }}>{label}</td>
@@ -231,7 +313,7 @@ export default async function ArticlePage({
                             {authors[0]?.middle_name?.[0] ? `${authors[0].middle_name[0]}.` : ''}{' '}
                             {article.title_ru} // Гуманитарные исследования Центральной России.{' '}
                             {article.issue_year}. №{article.issue_number} ({article.issue_volume}).{' '}
-                            С. {article.pages_from}–{article.pages_to}.{' '}
+                            {article.pages_from && article.pages_to && `С. ${article.pages_from}–${article.pages_to}. `}
                             DOI: {article.doi}
                         </p>
                     </div>

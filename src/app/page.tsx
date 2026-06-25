@@ -68,7 +68,7 @@ export default async function Home() {
   return (
       <main>
         {/* TOP BAR */}
-        <div style={{ background: '#5a1212', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '6px 0', textAlign: 'center' }}>
+        <div className="top-bar" style={{ background: '#5a1212', color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '6px 0', textAlign: 'center' }}>
           ВАК · РИНЦ · eLibrary · DOI · Google Scholar · КиберЛенинка &nbsp;|&nbsp; ISSN 2541-9056
         </div>
 
@@ -77,8 +77,8 @@ export default async function Home() {
 
         {/* HERO */}
         {heroArticle && (
-            <section style={{ background: '#141414', color: '#fff', padding: '64px 0 56px', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
+            <section className="hero"  style={{ background: '#141414', color: '#fff', padding: '64px 0 56px', position: 'relative', overflow: 'hidden' }}>
+              <div className="hero-inner" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
                 <div style={{ fontSize: 11, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 16 }}>
                   Последний выпуск · №{currentIssue?.number} ({currentIssue?.volume}) · {currentIssue?.year}
                 </div>
@@ -110,7 +110,7 @@ export default async function Home() {
 
         {/* STATS */}
         <div style={{ background: 'var(--burgundy)', color: '#fff', padding: '28px 0' }}>
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', textAlign: 'center' }}>
+          <div className="stats-grid" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', textAlign: 'center' }}>
             {[
               { num: currentIssue?.volume, label: 'Выпусков издано' },
               { num: '680+', label: 'Опубликованных статей' },
@@ -118,7 +118,7 @@ export default async function Home() {
               { num: '4', label: 'Специальности ВАК' },
             ].map(({ num, label }) => (
                 <div key={label}>
-                  <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 36, fontWeight: 700, lineHeight: 1 }}>{num}</div>
+                  <div className="stat-num" style={{ fontFamily: 'Playfair Display, serif', fontSize: 36, fontWeight: 700, lineHeight: 1 }}>{num}</div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>{label}</div>
                 </div>
             ))}
@@ -127,7 +127,7 @@ export default async function Home() {
 
         {/* ARTICLES */}
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '40px 0 20px', borderBottom: '2px solid var(--ink)', marginBottom: 28 }}>
+          <div className="page-grid" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '40px 0 20px', borderBottom: '2px solid var(--ink)', marginBottom: 28 }}>
             <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 700 }}>
               Статьи текущего выпуска
             </h2>
@@ -204,7 +204,7 @@ export default async function Home() {
         </div>
 
         {/* ARCHIVE */}
-        <div style={{ background: '#fff', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '40px 0' }}>
+        <div className="archive-strip" style={{ background: '#fff', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '40px 0' }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
               <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 700 }}>Архив выпусков</h2>
@@ -213,11 +213,11 @@ export default async function Home() {
             <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8 }}>
               {allIssues.map((issue: any) => (
                   <div key={issue.id} style={{ flexShrink: 0, width: 140, border: `1px solid ${issue.is_current ? 'var(--burgundy)' : 'var(--border)'}`, borderRadius: 4, overflow: 'hidden', cursor: 'pointer' }}>
-                    <div style={{ height: 100, background: 'linear-gradient(135deg, #141414, #2a1a1a)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 28, fontWeight: 700 }}>{issue.volume}</div>
+                    <div className="archive-card" style={{ height: 100, background: 'linear-gradient(135deg, #141414, #2a1a1a)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                      <div  style={{ fontFamily: 'Playfair Display, serif', fontSize: 28, fontWeight: 700 }}>{issue.volume}</div>
                       <div style={{ fontSize: 9, letterSpacing: '1.5px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>№{issue.number} · {issue.year}</div>
                     </div>
-                    <div style={{ padding: '10px 12px' }}>
+                    <div className="archive-card" style={{ padding: '10px 12px' }}>
                       <div style={{ fontSize: 11, color: 'var(--ink3)' }}>Выпуск {issue.number} ({issue.volume})</div>
                       <div style={{ fontSize: 10, color: '#9a9a9a' }}>{String(issue.article_count)} статей</div>
                     </div>
